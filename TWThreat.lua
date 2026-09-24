@@ -982,7 +982,18 @@ function TWT.checkRelay()
 end
 
 function TWT.checkTargetFrames()
-    local tf = _G['TargetFrame']
+    local tf
+    if FostercareTweaks and FostercareTweaks.GetActiveTargetFrame then
+        tf = FostercareTweaks.GetActiveTargetFrame()
+    else
+        tf = _G['TargetFrame']
+    end
+    local indicator = _G['TWThreatDisplayTarget']
+    if tf and indicator and TWT.targetIndicatorAnchor ~= tf then
+        indicator:ClearAllPoints()
+        indicator:SetPoint('TOPLEFT', tf, 'TOPLEFT', 1, 0)
+        TWT.targetIndicatorAnchor = tf
+    end
     TWT.targetFrameVisible = (tf and tf:IsVisible() ~= nil)
 end
 
@@ -1397,6 +1408,7 @@ function TWT.calcTPS(name)
 end
 
 function TWT.updateTargetFrameThreatIndicators(perc)
+    TWT.checkTargetFrames()
     if TWT_CONFIG.fullScreenGlow then
         _G['TWTFullScreenGlow']:Show()
     else

@@ -44,6 +44,7 @@ TWThreat is engineered around strict low-level system integration:
 - **Target Frame Threat Integration**:
   - **Threat Glow**: Visual threat border aura on your target frame (Green -> Yellow -> Red).
   - **Numeric Percentage Badge**: Real-time numerical threat percentage displayed directly on the target frame.
+  - **Optional Target Anchor**: Uses `FostercareTweaks.GetActiveTargetFrame()` when available; otherwise anchors to Blizzard's `TargetFrame`.
 
 ### 2. Multi-Target Tank Mode & Alerts
 - **Multi-Target Tank Mode**: Companion HUD displaying real-time threat status across all active tanked mobs, with direct GUID targeting.
