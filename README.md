@@ -2,14 +2,11 @@
 
 [![Interface: 1.12.1](https://img.shields.io/badge/Interface-1.12.1%20(5875)-orange.svg)](https://github.com/Fostercare5988/TWThreat)
 [![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-blue.svg)](https://github.com/Fostercare5988/TWThreat/releases)
-[![ClassicAPI: v1.14.0+](https://img.shields.io/badge/ClassicAPI-v1.14.0+-green.svg)](https://github.com/brues-code/ClassicAPI)
+[![ClassicAPI: v1.15.14+](https://img.shields.io/badge/ClassicAPI-v1.15.14+-green.svg)](https://github.com/brues-code/ClassicAPI)
 [![SuperWoW: v2.2+](https://img.shields.io/badge/SuperWoW-v2.2+-brightgreen.svg)](https://github.com/balakethelock/SuperWoW)
-[![NamPower: v4.6.3+](https://img.shields.io/badge/NamPower-v4.6.3+-blueviolet.svg)](https://github.com/Emyrk/nampower)
-[![UnitXP: SP3](https://img.shields.io/badge/UnitXP-SP3-teal.svg)](https://github.com/brues-code/UnitXP_SP3)
-[![DXVK: Vulkan](https://img.shields.io/badge/DXVK-Vulkan-red.svg)](https://github.com/doitsujin/dxvk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**TWThreat v1.4.0** is an enterprise-grade, real-time threat metering engine engineered natively for **World of Warcraft 1.12.1 (Build 5875)** running on the **Enhanced Client Extension Stack** (**ClassicAPI v1.14.0+**, **SuperWoW v2.2+**, **NamPower 4.6.3+**, **UnitXP SP3**, and **DXVK**).
+**TWThreat v1.4.0** is a real-time threat metering addon engineered natively for **World of Warcraft 1.12.1 (Build 5875)** running on the **Enhanced Client Extension Stack** (**ClassicAPI v1.15.14+**, **SuperWoW v2.2+**).
 
 TWThreat provides instantaneous server-authoritative threat tracking, eliminates combat garbage collection stutter, delivers smooth bar animations, and provides direct SuperWoW GUID targeting.
 
@@ -23,15 +20,12 @@ TWThreat is engineered around strict low-level system integration:
 
 | Engine Component | Minimum Version | Architectural Role & Implementation |
 | :--- | :--- | :--- |
-| **ClassicAPI** | `v1.14.0+` | C++ hardware timers, native `table.wipe` memory recycling, and source-rewritten Lua 5.1 syntax. |
-| **SuperWoW** | `v2.2+` | Direct memory state access, `TargetUnit(guid)` instant mob targeting, and zero-latency threat synchronization. |
-| **NamPower** | `v4.6.3+` | Microsecond-precision combat pipeline and frame-0 event dispatching. |
-| **UnitXP** | `SP3` | High-precision unit inspection and exact threat percentage calculation. |
-| **DXVK** | `Latest` | Decoupled high-refresh rendering with zero garbage collection heap churn and normalized delta-time bar animations. |
+| **ClassicAPI** | `v1.15.14+` | C++ hardware timers, native `table.wipe` memory recycling, and source-rewritten Lua 5.1 syntax. |
+| **SuperWoW** | `v2.2+` | Direct memory state access, `TargetUnit(guid)` instant mob targeting, and threat synchronization. |
 
 ### Elimination of 2006 Legacy Techniques
 - **Zero Combat GC Churn**: Eradicated dynamic table allocations during combat. Employs pre-allocated recycling pools (`threatPool`, `tankModePool`, `sortList`) and single-pass string parsing, eliminating frame drops in 40-man raids.
-- **Delta-Time Decoupled Frame Smoothing**: Bar animations and glow transitions use normalized delta-time (`dt`) exponential smoothing, guaranteeing stutter-free rendering under DXVK and Vulkan.
+- **Delta-Time Decoupled Frame Smoothing**: Bar animations and glow transitions use normalized delta-time (`dt`) exponential smoothing, guaranteeing smooth rendering.
 - **SuperWoW Direct GUID Targeting**: Tank Mode utilizes SuperWoW's `TargetUnit(guid)` API for instant, 100% reliable targeting of specific mobs in multi-mob packs without fuzzy targeting errors.
 - **Zero pfUI Bloat & Clean XML**: Completely eliminated legacy pfUI dependencies, unresolved frame anchors (`pfTarget`), and dead texture assets, ensuring zero errors in `FrameXML.log`.
 
@@ -75,11 +69,8 @@ Use `/twt` or `/twtshow`:
 
 ### Prerequisites
 1. **World of Warcraft 1.12.1** (Build 5875).
-2. [**ClassicAPI v1.14.0+**](https://github.com/brues-code/ClassicAPI) (`ClassicAPI.dll`).
+2. [**ClassicAPI v1.15.14+**](https://github.com/brues-code/ClassicAPI) (`ClassicAPI.dll`).
 3. [**SuperWoW v2.2+**](https://github.com/balakethelock/SuperWoW) (`SuperWoW.dll`).
-4. [**NamPower v4.6.3+**](https://github.com/Emyrk/nampower) (`nampower.dll`).
-5. [**UnitXP SP3**](https://codeberg.org/konaka/UnitXP_SP3) (`UnitXP_SP3.dll`).
-6. [**DXVK**](https://github.com/doitsujin/dxvk) & [**VanillaFixes**](https://github.com/hannesmann/vanillafixes).
 
 ### Step-by-Step Installation
 1. Clone or download the repository into your WoW AddOns directory:

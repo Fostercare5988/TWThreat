@@ -1,6 +1,6 @@
 ## Interface: 11200
 ## Title: TWThreat
-## Notes: Real-time threat meter engineered natively for World of Warcraft 1.12.1 (ClassicAPI v1.14.0+, SuperWoW 2.2+, NamPower 4.6.3+, UnitXP SP3, DXVK).
+## Notes: Real-time threat meter engineered natively for World of Warcraft 1.12.1 (ClassicAPI v1.15.14+, SuperWoW 2.2+).
 ## Author: Xerron/Er, Fostercare5988
 ## Version: 1.4.0
 ## SavedVariablesPerCharacter: TWT_CONFIG
