@@ -1,5 +1,7 @@
 # TWThreat
 
+Recommended ClassicAPI version: **v1.15.15+**. The existing enforced addon minimum remains unchanged because this update introduces no required new API calls. Native equipment-set action buttons require v1.15.15; after updating the DLL, fully restart the game client.
+
 [![Interface: 1.12.1](https://img.shields.io/badge/Interface-1.12.1%20(5875)-orange.svg)](https://github.com/Fostercare5988/TWThreat)
 [![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-blue.svg)](https://github.com/Fostercare5988/TWThreat/releases)
 [![ClassicAPI: v1.15.14+](https://img.shields.io/badge/ClassicAPI-v1.15.14+-green.svg)](https://github.com/brues-code/ClassicAPI)
