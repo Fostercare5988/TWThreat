@@ -1,14 +1,14 @@
 # TWThreat
 
-Recommended ClassicAPI version: **v1.15.15+**. The existing enforced addon minimum remains unchanged because this update introduces no required new API calls. Native equipment-set action buttons require v1.15.15; after updating the DLL, fully restart the game client.
+Required ClassicAPI version: **v1.15.15+**. This is the maintainer's published support baseline for this addon suite; it is not a claim that every API used here was introduced in v1.15.15. After replacing ClassicAPI.dll, fully restart WoW; `/reload` cannot reload a DLL.
 
 [![Interface: 1.12.1](https://img.shields.io/badge/Interface-1.12.1%20(5875)-orange.svg)](https://github.com/Fostercare5988/TWThreat)
 [![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-blue.svg)](https://github.com/Fostercare5988/TWThreat/releases)
-[![ClassicAPI: v1.15.14+](https://img.shields.io/badge/ClassicAPI-v1.15.14+-green.svg)](https://github.com/brues-code/ClassicAPI)
+[![ClassicAPI: v1.15.15+](https://img.shields.io/badge/ClassicAPI-v1.15.15+-green.svg)](https://github.com/brues-code/ClassicAPI)
 [![SuperWoW: v2.2+](https://img.shields.io/badge/SuperWoW-v2.2+-brightgreen.svg)](https://github.com/balakethelock/SuperWoW)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**TWThreat v1.4.0** is a real-time threat metering addon engineered natively for **World of Warcraft 1.12.1 (Build 5875)** running on the **Enhanced Client Extension Stack** (**ClassicAPI v1.15.14+**, **SuperWoW v2.2+**).
+**TWThreat v1.4.0** is a real-time threat metering addon engineered natively for **World of Warcraft 1.12.1 (Build 5875)** running on the **Enhanced Client Extension Stack** (**ClassicAPI v1.15.15+**, **SuperWoW v2.2+**).
 
 TWThreat provides instantaneous server-authoritative threat tracking, eliminates combat garbage collection stutter, delivers smooth bar animations, and provides direct SuperWoW GUID targeting.
 
@@ -22,7 +22,7 @@ TWThreat is engineered around strict low-level system integration:
 
 | Engine Component | Minimum Version | Architectural Role & Implementation |
 | :--- | :--- | :--- |
-| **ClassicAPI** | `v1.15.14+` | C++ hardware timers, native `table.wipe` memory recycling, and source-rewritten Lua 5.1 syntax. |
+| **ClassicAPI** | `v1.15.15+` | C++ hardware timers, native `table.wipe` memory recycling, and source-rewritten Lua 5.1 syntax. |
 | **SuperWoW** | `v2.2+` | Direct memory state access, `TargetUnit(guid)` instant mob targeting, and threat synchronization. |
 
 ### Elimination of 2006 Legacy Techniques
@@ -71,7 +71,7 @@ Use `/twt` or `/twtshow`:
 
 ### Prerequisites
 1. **World of Warcraft 1.12.1** (Build 5875).
-2. [**ClassicAPI v1.15.14+**](https://github.com/brues-code/ClassicAPI) (`ClassicAPI.dll`).
+2. [**ClassicAPI v1.15.15+**](https://github.com/brues-code/ClassicAPI) (`ClassicAPI.dll`).
 3. [**SuperWoW v2.2+**](https://github.com/balakethelock/SuperWoW) (`SuperWoW.dll`).
 
 ### Step-by-Step Installation
