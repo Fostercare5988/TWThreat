@@ -1,7 +1,8 @@
 -- Strict Engine Dependency Guard (Mandatory ClassicAPI v1.15.15+ & SuperWoW v2.2+)
 local MIN_CLASSIC_API = 11515
-if type(CLASSIC_API_VERSION) ~= "number" or not SUPERWOW_VERSION or
-   CLASSIC_API_VERSION < MIN_CLASSIC_API then
+local superVersion = tonumber(SUPERWOW_VERSION)
+if type(CLASSIC_API_VERSION) ~= "number" or CLASSIC_API_VERSION < MIN_CLASSIC_API
+        or not superVersion or superVersion < 2.2 or not C_Timer or not C_Timer.NewTicker then
     if DEFAULT_CHAT_FRAME then
         DEFAULT_CHAT_FRAME:AddMessage("|cffff2020[TWThreat Fatal Error]|r TWThreat requires ClassicAPI (v1.15.15+) & SuperWoW (v2.2+)! Please ensure both DLLs are loaded.", 1, 0.2, 0.2)
     end
@@ -901,7 +902,6 @@ function TWT.combatStart()
     TWT.updateUI('combatStart')
 
     TWT.threatQuery:Show()
-    TWT.barAnimator:Show()
 
     TWTTankModeWindowChangeStick_OnClick()
     _G['TWTMain']:SetAlpha(TWT_CONFIG.combatAlpha)
@@ -1102,10 +1102,6 @@ function TWT.updateUI(from)
 
     uiUpdates = uiUpdates + 1
 
-    if not TWT.barAnimator:IsVisible() then
-        TWT.barAnimator:Show()
-    end
-
     TWT.hideThreatFrames()
 
     if not UnitAffectingCombat('player') and not _G['TWTMainSettings']:IsVisible() then
@@ -1285,7 +1281,7 @@ function TWT.updateUI(from)
     end
 end
 
--- Delta-Time Decoupled Bar Smoothing Engine (DXVK Frame Pacing Optimized)
+-- Render-frame smoothing runs only while a bar has an unfinished width change.
 TWT.barAnimator = CreateFrame('Frame', "TWTBarAnimatorFrame")
 TWT.barAnimator:Hide()
 TWT.barAnimator.frames = {}
@@ -1294,6 +1290,7 @@ function TWT.barAnimator:animateTo(index, perc, instant)
     local key = 'TWThreat' .. index .. 'BG'
     if perc == nil then
         TWT.barAnimator.frames[key] = nil
+        if not next(TWT.barAnimator.frames) then TWT.barAnimator:Hide() end
         return false
     end
 
@@ -1303,12 +1300,14 @@ function TWT.barAnimator:animateTo(index, perc, instant)
         local bg = _G[key]
         if bg then bg:SetWidth(width) end
         TWT.barAnimator.frames[key] = nil
+        if not next(TWT.barAnimator.frames) then TWT.barAnimator:Hide() end
         return true
     end
     TWT.barAnimator.frames[key] = width
+    TWT.barAnimator:Show()
 end
 
-TWT.barAnimator:SetScript("OnShow", function()
+TWT.barAnimator:SetScript("OnHide", function()
     table_wipe(this.frames)
 end)
 
@@ -1316,7 +1315,6 @@ TWT.barAnimator:SetScript("OnUpdate", function()
     local dt = arg1 or 0.016
     if dt > 0.1 then dt = 0.1 end
 
-    local hasActive = false
     for frameName, targetW in __pairs(TWT.barAnimator.frames) do
         local frame = _G[frameName]
         if frame and targetW then
@@ -1328,7 +1326,6 @@ TWT.barAnimator:SetScript("OnUpdate", function()
                     step = diff > 0 and 0.2 or -0.2
                 end
                 frame:SetWidth(currentW + step)
-                hasActive = true
             else
                 frame:SetWidth(targetW)
                 TWT.barAnimator.frames[frameName] = nil
@@ -1337,22 +1334,18 @@ TWT.barAnimator:SetScript("OnUpdate", function()
             TWT.barAnimator.frames[frameName] = nil
         end
     end
+    if not next(TWT.barAnimator.frames) then TWT.barAnimator:Hide() end
 end)
 
--- Delta-Time Threat Query Timer
-TWT.threatQuery.elapsed = 0
+-- One native timer owns the query cadence; hiding cancels it and invalidates
+-- callbacks from an earlier combat session.
 TWT.threatQuery:SetScript("OnShow", function()
-    this.elapsed = 0
-end)
-
-TWT.threatQuery:SetScript("OnUpdate", function()
-    local dt = arg1 or 0.016
-    this.elapsed = (this.elapsed or 0) + dt
-    if this.elapsed >= TWT.updateSpeed then
-        this.elapsed = 0
-        if GetNumRaidMembers() == 0 and GetNumPartyMembers() == 0 then
-            return
-        end
+    local frame = this
+    if frame.timer then frame.timer:Cancel() end
+    local timer
+    timer = C_Timer.NewTicker(TWT.updateSpeed, function()
+        if frame.timer ~= timer or not frame:IsVisible() then return end
+        if GetNumRaidMembers() == 0 and GetNumPartyMembers() == 0 then return end
         if UnitAffectingCombat('player') and UnitAffectingCombat('target') then
             if TWT.targetName == '' then
                 TWT.targetChanged()
@@ -1367,7 +1360,12 @@ TWT.threatQuery:SetScript("OnUpdate", function()
                 end
             end
         end
-    end
+    end)
+    frame.timer = timer
+end)
+
+TWT.threatQuery:SetScript("OnHide", function()
+    if this.timer then this.timer:Cancel(); this.timer = nil end
 end)
 
 function TWT.calcTPS(name)
