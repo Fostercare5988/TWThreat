@@ -1,3 +1,4 @@
+## X-Maintainer: Fostercare5988
 ## Interface: 11200
 ## X-ClassicAPI-Min-Version: 1.15.15
 ## Title: TWThreat
@@ -6,6 +7,6 @@
 ## Version: 1.4.0
 ## SavedVariablesPerCharacter: TWT_CONFIG
 ## X-Category: Combat & Threat
-## X-Website: https://github.com/Fostercare5988/TWThreat
+## X-Website: https://github.com/Fostercare5988
 
 TWThreat.xml
