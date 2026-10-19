@@ -1,10 +1,10 @@
--- Strict Engine Dependency Guard (Mandatory ClassicAPI v1.15.15+ & SuperWoW v2.2+)
-local MIN_CLASSIC_API = 11515
+-- Strict Engine Dependency Guard (Mandatory ClassicAPI v1.16.0+ & SuperWoW v2.2+)
+local MIN_CLASSIC_API = 11600
 local superVersion = tonumber(SUPERWOW_VERSION)
 if type(CLASSIC_API_VERSION) ~= "number" or CLASSIC_API_VERSION < MIN_CLASSIC_API
         or not superVersion or superVersion < 2.2 or not C_Timer or not C_Timer.NewTicker then
     if DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffff2020[TWThreat Fatal Error]|r TWThreat requires ClassicAPI (v1.15.15+) & SuperWoW (v2.2+)! Please ensure both DLLs are loaded.", 1, 0.2, 0.2)
+        DEFAULT_CHAT_FRAME:AddMessage("|cffff2020[TWThreat Fatal Error]|r TWThreat requires ClassicAPI (v1.16.0+) & SuperWoW (v2.2+)! Please ensure both DLLs are loaded.", 1, 0.2, 0.2)
     end
     return
 end
