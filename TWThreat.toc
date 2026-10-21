@@ -2,7 +2,7 @@
 ## Interface: 11200
 ## X-ClassicAPI-Min-Version: 1.16.0
 ## Dependencies: !!!ClassicAPI
-## Title: TWThreat
+## Title: |cffff9e38TWThreat|r |cffffd6a8[Fostercare5988]|r
 ## Notes: Real-time threat meter engineered natively for World of Warcraft 1.12.1 (ClassicAPI v1.16.0+, SuperWoW 2.2+).
 ## Author: Xerron/Er, Fostercare5988
 ## Version: 1.4.0
