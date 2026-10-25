@@ -981,13 +981,9 @@ function TWT.checkRelay()
     return (#TWT.relayTo > 0)
 end
 
+-- The target indicator sits on Blizzard's target frame.
 function TWT.checkTargetFrames()
-    local tf
-    if FostercareTweaks and FostercareTweaks.GetActiveTargetFrame then
-        tf = FostercareTweaks.GetActiveTargetFrame()
-    else
-        tf = _G['TargetFrame']
-    end
+    local tf = TargetFrame
     local indicator = _G['TWThreatDisplayTarget']
     if tf and indicator and TWT.targetIndicatorAnchor ~= tf then
         indicator:ClearAllPoints()
