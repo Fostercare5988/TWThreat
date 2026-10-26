@@ -139,7 +139,7 @@ TWT.updateSpeeds = {
     ['druid']   = { 0.8, 0.5, 1.0 },
 }
 
-function twtprint(a)
+local function twtprint(a)
     if a == nil then
         DEFAULT_CHAT_FRAME:AddMessage('[TWT]|cff0070de:' .. GetTime() .. '|cffffffff attempt to print a nil value.')
         return false
@@ -147,7 +147,7 @@ function twtprint(a)
     DEFAULT_CHAT_FRAME:AddMessage((TWT.classColors[TWT.class] and TWT.classColors[TWT.class].c or "|cffffffff") .. "[TWT] |cffffffff" .. a)
 end
 
-function twtdebug(a)
+local function twtdebug(a)
     if not (TWT_CONFIG and TWT_CONFIG.debug) then
         return false
     end
@@ -1256,7 +1256,13 @@ function TWT.updateUI(from)
                 local targetClsColor = TWT.classColors[TWT.getClass(data.name)] and TWT.classColors[TWT.getClass(data.name)].c or '|cffffffff'
                 _G['TMEF' .. i .. 'Player']:SetText(targetClsColor .. data.name)
                 _G['TMEF' .. i .. 'Perc']:SetText(TWT.round(data.perc) .. '%')
-                _G['TMEF' .. i .. 'TargetButton']:SetID(guid)
+                -- ClassicAPI unit button: left click targets this creature by its GUID,
+                -- hovering makes it the mouseover unit. Test rows have no GUID.
+                -- UNVERIFIED: test in game that the server sends GUIDs as "0x" + hex.
+                local button = _G['TMEF' .. i .. 'TargetButton']
+                local unit = __find(guid, '^0x%x+$') and guid or nil
+                if button:GetAttribute('unit') ~= unit then button:SetAttribute('unit', unit) end
+                if not button:GetAttribute('type1') then button:SetAttribute('type1', 'target') end
                 _G['TMEF' .. i]:SetPoint("TOPLEFT", _G["TWTMainTankModeWindow"], "TOPLEFT", 0, -21 + 24 - i * 25)
                 _G['TMEF' .. i .. 'RaidTargetIcon']:Hide()
 
@@ -1855,35 +1861,6 @@ function TWTFontSelect(id)
     TWT_CONFIG.font = TWT.fonts[id]
     _G['TWTMainSettingsFontButton']:SetText(TWT_CONFIG.font)
     TWT.updateUI('TWTFontSelect')
-end
-
--- SuperWoW Direct GUID Targeting Integration
-function TWTTargetButton_OnClick(guidOrIndex)
-    local key = __parsestring(guidOrIndex)
-    local data = TWT.tankModeThreats[key]
-
-    if data then
-        -- SuperWoW direct GUID targeting if available
-        if TargetUnit and type(TargetUnit) == "function" then
-            TargetUnit(guidOrIndex)
-            if UnitExists("target") and (not GetUnitGUID or GetUnitGUID("target") == guidOrIndex) then
-                return true
-            end
-        end
-
-        -- Exact whole-name targeting (SuperWoW) or AssistByName fallback
-        if data.name and data.name ~= '' then
-            if TargetByName then
-                TargetByName(data.name, true)
-                if UnitExists("target") then return true end
-            end
-            AssistByName(data.name)
-            return true
-        end
-    end
-
-    twtprint('Cannot target tankmode target.')
-    return false
 end
 
 function TWT.formatNumber(n)

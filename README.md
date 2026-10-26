@@ -6,7 +6,7 @@ Requires ClassicAPI 1.17.7+ with `C_Timer.NewTicker`, SuperWoW 2.2+, and the sup
 
 - `/twt show` opens the main window; `/twt tankmode` enables tank mode.
 - The gear icon opens display, scale, font, column and alert settings; the padlock controls movement.
-- Tank-mode bars can target the represented creature by GUID.
+- Click a tank-mode bar to target its creature (by GUID, through ClassicAPI); hovering makes it your mouseover.
 - Target indicators sit on Blizzard's target frame.
 - Threat queries use one cancellable combat timer. Bar smoothing runs while widths are changing and sleeps when they settle.
 

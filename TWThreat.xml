@@ -101,11 +101,6 @@
                         </Offset>
                     </Anchor>
                 </Anchors>
-                <Scripts>
-                    <OnClick>
-                        TWTTargetButton_OnClick(this:GetID())
-                    </OnClick>
-                </Scripts>
             </Button>
         </Frames>
     </Frame>
