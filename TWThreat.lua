@@ -1930,3 +1930,25 @@ function TWT.wipe(src)
     end
     return src
 end
+
+-- Game Menu > AddOn Options > TWThreat (ClassicAPI).
+local entry = CreateFrame("Frame", "TWThreatOptionsEntry")
+entry.name = "TWThreat"
+local entryTitle = entry:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+entryTitle:SetPoint("TOPLEFT", entry, "TOPLEFT", 16, -16)
+entryTitle:SetText("TWThreat")
+local entryText = entry:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+entryText:SetPoint("TOPLEFT", entryTitle, "BOTTOMLEFT", 0, -8)
+entryText:SetWidth(380)
+entryText:SetJustifyH("LEFT")
+entryText:SetText("Threat meter. Type /twtshow to show the window at any time.")
+local entryOpen = CreateFrame("Button", "TWThreatOptionsEntryOpen", entry, "UIPanelButtonTemplate")
+entryOpen:SetWidth(172); entryOpen:SetHeight(22)
+entryOpen:SetPoint("TOPLEFT", entry, "TOPLEFT", 16, -80)
+entryOpen:SetText("Show threat window")
+entryOpen:SetScript("OnClick", function()
+    if InterfaceOptionsFrame and InterfaceOptionsFrame:IsShown() then InterfaceOptionsFrame:Hide() end
+    if GameMenuFrame and GameMenuFrame:IsShown() then HideUIPanel(GameMenuFrame) end
+    SlashCmdList["TWTSHOW"]()
+end)
+InterfaceOptions_AddCategory(entry)
