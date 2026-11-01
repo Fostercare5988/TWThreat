@@ -1,6 +1,5 @@
 ## X-Maintainer: Fostercare5988
 ## Interface: 11200
-## Dependencies: !!!ClassicAPI
 ## Title: |cffff9e38TWThreat|r |cffffd6a8[Fostercare5988]|r
 ## Notes: Real-time threat meter engineered natively for World of Warcraft 1.12.1 (ClassicAPI, SuperWoW 2.2+).
 ## Author: Xerron/Er, Fostercare5988
