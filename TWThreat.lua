@@ -1863,14 +1863,7 @@ function TWTFontSelect(id)
 end
 
 function TWT.formatNumber(n)
-    if not n or n < 0 then n = 0 end
-    if n < 999 then
-        return TWT.round(n)
-    end
-    if n < 999999 then
-        return (TWT.round(n / 10) / 100) .. 'K'
-    end
-    return (TWT.round(n / 10000) / 100) .. 'M'
+    return AbbreviateNumbers(n and n > 0 and n or 0)
 end
 
 function TWT.tableSize(t)
