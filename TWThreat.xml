@@ -450,7 +450,7 @@
                 this:SetUserPlaced(true);
             </OnLoad>
             <OnDragStart>
-                if getglobal('TWTMainLockButtonNT'):GetTexture() == 'Interface\\addons\\TWThreat\\images\\icon_unlocked'
+                if TWTMainLockButtonNT:GetTexture() == 'Interface\\addons\\TWThreat\\images\\icon_unlocked'
                 then
                 this:StartMoving();
                 this.isMoving = true;
@@ -1991,7 +1991,7 @@
                 this:SetUserPlaced(true);
             </OnLoad>
             <OnDragStart>
-                if getglobal('TWTMainLockButtonNT'):GetTexture() == 'Interface\\addons\\TWThreat\\images\\icon_unlocked'
+                if TWTMainLockButtonNT:GetTexture() == 'Interface\\addons\\TWThreat\\images\\icon_unlocked'
                 then
                 this:StartMoving();
                 this.isMoving = true;
@@ -2175,7 +2175,7 @@
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                        getglobal('TWTWithAddonList'):Hide()
+                        TWTWithAddonList:Hide()
                     </OnClick>
                 </Scripts>
             </Button>
