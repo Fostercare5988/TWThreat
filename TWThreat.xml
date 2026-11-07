@@ -281,40 +281,6 @@
         </Layers>
     </Frame>
 
-    <Font name="Mono" font="Interface\addons\TWThreat\fonts\RobotoMono.ttf" virtual="true">
-        <FontHeight>
-            <AbsValue val="10"/>
-        </FontHeight>
-    </Font>
-
-    <Frame name="TWTWarning" hidden="true" parent="UIParent">
-        <Size>
-            <AbsDimension x="500" y="40"/>
-        </Size>
-        <Anchors>
-            <Anchor point="CENTER">
-                <Offset>
-                    <AbsDimension x="0" y="0"/>
-                </Offset>
-            </Anchor>
-        </Anchors>
-        <Layers>
-            <Layer level="OVERLAY">
-                <FontString name="$parentText" font="Fonts\FRIZQT__.TTF" text="care">
-                    <FontHeight val="40"/>
-                    <Color r="1" g="0.1" b="0.1" a="1"/>
-                    <Shadow>
-                        <Offset x="1" y="-1"/>
-                        <Color r="0" g="0" b="0"/>
-                    </Shadow>
-                    <Size>
-                        <AbsDimension x="500" y="40"/>
-                    </Size>
-                </FontString>
-            </Layer>
-        </Layers>
-    </Frame>
-
     <Frame name="TWTMain" hidden="true" toplevel="true"
            parent="UIParent" movable="false" enableMouse="true" resizable="true">
         <Size>
@@ -364,20 +330,6 @@
                 </Texture>
             </Layer>
             <Layer level="OVERLAY">
-
-                <FontString name="pps" inherits="GameFontHighlightSmall" text="pps"
-                            justifyH="LEFT" hidden="true">
-                    <Size>
-                        <AbsDimension x="305" y="20"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="TOPLEFT">
-                            <Offset>
-                                <AbsDimension x="5" y="20"/>
-                            </Offset>
-                        </Anchor>
-                    </Anchors>
-                </FontString>
 
                 <FontString name="$parentTitle" inherits="GameFontHighlight" text="Name" justifyH="LEFT">
                     <Size>
@@ -450,8 +402,7 @@
                 this:SetUserPlaced(true);
             </OnLoad>
             <OnDragStart>
-                if TWTMainLockButtonNT:GetTexture() == 'Interface\\addons\\TWThreat\\images\\icon_unlocked'
-                then
+                if not TWT_CONFIG.lock then
                 this:StartMoving();
                 this.isMoving = true;
                 end
@@ -573,8 +524,6 @@
                         TWTMain:StopMovingOrSizing()
                         TWTMainMainWindow_Resized()
                     </OnMouseUp>
-                    <OnClick>
-                    </OnClick>
                 </Scripts>
             </Button>
 
@@ -883,7 +832,7 @@
                                 GameTooltip:SetOwner(this, "ANCHOR_RIGHT", -(this:GetWidth() / 2) + 5, 0);
                                 GameTooltip:AddLine('Tank Mode');
                                 GameTooltip:AddLine('Extra window showing creatures you are tanking.', 1, 1, 1);
-                                GameTooltip:AddLine('Disables Full Screen Glow effect and Agro Warning Sound.', 1,1,1);
+                                GameTooltip:AddLine('Mutes the full-screen glow and the warning sound.', 1, 1, 1);
                                 GameTooltip:AddLine('This frame is visible only when you are tanking', 1, 1, 1);
                                 GameTooltip:AddLine('more than one creature.', 1, 1, 1);
                                 GameTooltip:Show();
@@ -947,59 +896,6 @@
                         <CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
                         <DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
                     </CheckButton>
-
-                    <Button name="TWTMainSettingsHealerMasterTargetButton" inherits="UIPanelButtonTemplate"
-                            text="From Target" hidden="true">
-                        <NormalTexture name="$parentNT" file="Interface\addons\TWThreat\images\textures\Smooth"
-                                       alphaMode="ADD">
-                        </NormalTexture>
-                        <PushedTexture name="$parentPT" file="Interface\addons\TWThreat\images\textures\Smooth"/>
-                        <HighlightTexture/>
-                        <Size>
-                            <AbsDimension x="140" y="16"/>
-                        </Size>
-                        <Anchors>
-                            <Anchor point="TOPLEFT">
-                                <Offset>
-                                    <AbsDimension x="150" y="-110"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString name="$parentText" inherits="GameFontNormal" text="Healer Master Target"
-                                            justifyH="LEFT">
-                                    <Size>
-                                        <AbsDimension x="150" y="20"/>
-                                    </Size>
-                                    <Anchors>
-                                        <Anchor point="LEFT">
-                                            <Offset>
-                                                <AbsDimension x="-140" y="0"/>
-                                            </Offset>
-                                        </Anchor>
-                                    </Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
-                        <Scripts>
-                            <OnClick>
-                                TWTHealerMasterTarget_OnClick()
-                            </OnClick>
-                            <OnEnter>
-                                GameTooltip:ClearLines();
-                                GameTooltip:SetOwner(this, "ANCHOR_RIGHT", -(this:GetWidth() / 2) + 5, 0);
-                                GameTooltip:AddLine('Healer Master Target *EXPERIMENTAL*');
-                                GameTooltip:AddLine('Select a tank to get his target\'s threat information.', 1,1,1);
-                                GameTooltip:AddLine('Clicking this button with no target or with the same', 1,1,1);
-                                GameTooltip:AddLine('target will reset Master Target.', 1,1,1);
-                                GameTooltip:Show();
-                            </OnEnter>
-                            <OnLeave>
-                                GameTooltip:Hide();
-                            </OnLeave>
-                        </Scripts>
-                    </Button>
 
                     <Slider name="TWTMainSettingsWindowScaleSlider" inherits="TWTSliderTemplate"
                             minValue="0.5" maxValue="1.5" valueStep="0.05">
@@ -1068,7 +964,7 @@
                         </Layers>
                         <Scripts>
                             <OnValueChanged>
-                                WindowScaleSlider_OnValueChanged()
+                                TWTWindowScaleSlider_OnValueChanged()
                             </OnValueChanged>
                         </Scripts>
                     </Slider>
@@ -1127,7 +1023,7 @@
                         </Layers>
                         <Scripts>
                             <OnValueChanged>
-                                CombatOpacitySlider_OnValueChanged()
+                                TWTCombatOpacitySlider_OnValueChanged()
                             </OnValueChanged>
                         </Scripts>
                     </Slider>
@@ -1186,7 +1082,7 @@
                         </Layers>
                         <Scripts>
                             <OnValueChanged>
-                                OOCombatSlider_OnValueChanged()
+                                TWTOOCOpacitySlider_OnValueChanged()
                             </OnValueChanged>
                         </Scripts>
                     </Slider>
@@ -1321,7 +1217,7 @@
                         </Layers>
                         <Scripts>
                             <OnValueChanged>
-                                FrameHeightSlider_OnValueChanged()
+                                TWTFrameHeightSlider_OnValueChanged()
                             </OnValueChanged>
                         </Scripts>
                     </Slider>
@@ -1625,7 +1521,7 @@
                                 GameTooltip:SetOwner(this, "ANCHOR_RIGHT", -(this:GetWidth() / 2) + 5, 0);
                                 GameTooltip:AddLine('Full Screen Glow');
                                 GameTooltip:AddLine('Red glowing screen edges when you reach aggro threshold.',1,1,1);
-                                GameTooltip:AddLine('This feature is disabled in Tank Mode.', 1, 1, 1);
+                                GameTooltip:AddLine('Quiet while Tank Mode is on.', 1, 1, 1);
                                 GameTooltip:Show();
                             </OnEnter>
                             <OnLeave>
@@ -1675,7 +1571,7 @@
                                 GameTooltip:SetOwner(this, "ANCHOR_RIGHT", -(this:GetWidth() / 2) + 5, 0);
                                 GameTooltip:AddLine('Aggro Warning Sound');
                                 GameTooltip:AddLine('Plays a warning sound when you reach aggro threshold.',1,1,1);
-                                GameTooltip:AddLine('This feature is disabled in Tank Mode.', 1, 1, 1);
+                                GameTooltip:AddLine('Quiet while Tank Mode is on.', 1, 1, 1);
                                 GameTooltip:Show();
                             </OnEnter>
                             <OnLeave>
@@ -1756,7 +1652,7 @@
                         </Layers>
                         <Scripts>
                             <OnValueChanged>
-                                AggroThresholdSlider_OnValueChanged()
+                                TWTAggroThresholdSlider_OnValueChanged()
                             </OnValueChanged>
                         </Scripts>
                     </Slider>
@@ -1991,8 +1887,7 @@
                 this:SetUserPlaced(true);
             </OnLoad>
             <OnDragStart>
-                if TWTMainLockButtonNT:GetTexture() == 'Interface\\addons\\TWThreat\\images\\icon_unlocked'
-                then
+                if not TWT_CONFIG.lock then
                 this:StartMoving();
                 this.isMoving = true;
                 end
@@ -2075,126 +1970,6 @@
                 </FontString>
             </Layer>
         </Layers>
-    </Frame>
-
-    <Frame name="TWTWithAddonList" hidden="true" toplevel="true" parent="UIParent" movable="true" enableMouse="true">
-        <Size>
-            <AbsDimension x="540" y="210"/>
-        </Size>
-        <Anchors>
-            <Anchor point="CENTER">
-                <Offset>
-                    <AbsDimension x="0" y="0"/>
-                </Offset>
-            </Anchor>
-        </Anchors>
-        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
-        </Backdrop>
-        <Layers>
-            <Layer level="ARTWORK">
-                <Texture name="$parentTitleBG" file="Interface\addons\TWThreat\images\textures\Smooth">
-                    <Size>
-                        <AbsDimension x="298" y="20"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="TOPLEFT">
-                            <Offset>
-                                <AbsDimension x="1" y="0"/>
-                            </Offset>
-                        </Anchor>
-                        <Anchor point="TOPRIGHT">
-                            <Offset>
-                                <AbsDimension x="-1" y="0"/>
-                            </Offset>
-                        </Anchor>
-                    </Anchors>
-                </Texture>
-            </Layer>
-            <Layer level="OVERLAY">
-                <FontString name="$parentTitle" inherits="GameFontHighlight" text="Addon Raid Status">
-                    <Anchors>
-                        <Anchor point="TOP">
-                            <Offset>
-                                <AbsDimension x="0" y="-5"/>
-                            </Offset>
-                        </Anchor>
-                    </Anchors>
-                </FontString>
-                <FontString name="$parentText" inherits="Mono" text="">
-                    <Anchors>
-                        <Anchor point="CENTER">
-                            <Offset>
-                                <AbsDimension x="0" y="0"/>
-                            </Offset>
-                        </Anchor>
-                    </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-        <Frames>
-            <Button name="$parentRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
-                <NormalTexture name="$parentNT" file="Interface\addons\TWThreat\images\textures\Smooth" alphaMode="ADD">
-                </NormalTexture>
-                <PushedTexture name="$parentPT" file="Interface\addons\TWThreat\images\textures\Smooth"/>
-                <HighlightTexture/>
-                <Size>
-                    <AbsDimension x="16" y="16"/>
-                </Size>
-                <Anchors>
-                    <Anchor point="BOTTOMLEFT">
-                        <Offset>
-                            <AbsDimension x="1" y="1"/>
-                        </Offset>
-                    </Anchor>
-                    <Anchor point="BOTTOMRIGHT">
-                        <Offset>
-                            <AbsDimension x="-1" y="10"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnClick>
-                        QueryWho_OnClick()
-                    </OnClick>
-                </Scripts>
-            </Button>
-            <Button name="$parentCloseButton" inherits="UIPanelButtonTemplate" text="x">
-                <NormalTexture name="$parentNT" file="Interface\addons\TWThreat\images\textures\Smooth" alphaMode="ADD">
-                </NormalTexture>
-                <PushedTexture name="$parentPT" file="Interface\addons\TWThreat\images\textures\Smooth"/>
-                <HighlightTexture/>
-                <Size>
-                    <AbsDimension x="16" y="16"/>
-                </Size>
-                <Anchors>
-                    <Anchor point="TOPRIGHT">
-                        <Offset>
-                            <AbsDimension x="-2" y="-2"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnClick>
-                        TWTWithAddonList:Hide()
-                    </OnClick>
-                </Scripts>
-            </Button>
-        </Frames>
-        <Scripts>
-            <OnLoad>
-                this:RegisterForDrag("LeftButton");
-                this:SetMovable(1);
-                this:SetUserPlaced(true);
-            </OnLoad>
-            <OnDragStart>
-                this:StartMoving();
-                this.isMoving = true;
-            </OnDragStart>
-            <OnDragStop>
-                this:StopMovingOrSizing();
-                this.isMoving = false;
-            </OnDragStop>
-        </Scripts>
     </Frame>
 
 </Ui>
