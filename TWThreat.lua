@@ -13,7 +13,7 @@ local find, sub, lower = string.find, string.sub, string.lower
 local tremove, tsort = table.remove, table.sort
 
 local TWT = CreateFrame("Frame", "TWThreatCore")
-TWT.addonVer = '1.5.1'
+TWT.addonVer = '1.5.2'
 TWT.addonName = 'TWThreat'
 
 -- The server's threat protocol: we ask with an addon message, the answer comes
@@ -835,14 +835,17 @@ end)
 
 -- Target and combat -----------------------------------------------------------
 
--- Threat is shown for any NPC we fight in a group.
+-- Threat is shown for bosses, elites and rares we fight in a group; normal mobs
+-- die too fast for it to matter. The value is the target-frame glow image.
 local GLOW = { worldboss = 'elite', elite = 'elite', rareelite = 'rareelite', rare = 'rare' }
 
 function TWT.targetChanged()
     TWT.targetName = ''
     if not UnitExists('target') or UnitIsDead('target') or UnitIsPlayer('target') then return false end
+    local glow = GLOW[UnitClassification('target')]
+    if not glow then return false end
     if not groupChannel() or not inCombat() or not UnitAffectingCombat('target') then return false end
-    glowTexture = IMAGES .. (GLOW[UnitClassification('target')] or 'normal')
+    glowTexture = IMAGES .. glow
     TWT.targetName = TWT.unitNameForTitle(UnitName('target'))
     titleKey = nil
     TWT.updateTitleBarText(TWT.targetName)
