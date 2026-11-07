@@ -13,7 +13,7 @@ local find, sub, lower = string.find, string.sub, string.lower
 local tremove, tsort = table.remove, table.sort
 
 local TWT = CreateFrame("Frame", "TWThreatCore")
-TWT.addonVer = '1.5.0'
+TWT.addonVer = '1.5.1'
 TWT.addonName = 'TWThreat'
 
 -- The server's threat protocol: we ask with an addon message, the answer comes
@@ -25,7 +25,12 @@ local QUERY_PREFIX = 'TWT_UDTSv4'
 local PREFIX = 'TWT'
 local AGRO = '-Pull Aggro at-'
 
-local QUERY_EVERY = 0.5   -- seconds between queries: the original addon's fastest per-spec rate
+-- One query in flight: the next goes out as soon as the answer is back, so the
+-- update rate is what the server and the connection give, at most ten a second.
+local QUERY_GAP = 0.1       -- the least time between two queries
+local ANSWER_TIMEOUT = 1    -- ask again when an answer is this late
+local NO_ANSWER = 3         -- after this long without any answer, the title says so
+local RANK_DEADBAND = 1.5   -- percent a player must move before the ranking sees it
 local MOVE_TIME = 0.25    -- a bar sliding to its new rank
 local TEXT_EVERY = 0.1    -- numbers roll ten times a second
 local SAMPLES = 8         -- threat samples kept per player for threat per second
@@ -173,11 +178,14 @@ end
 local entries, pool = {}, {}
 local order = {}       -- the entries of the last answer, highest threat first
 local answer = 0       -- counts answers, to find players missing from one
-local querySent = false
+local querySent = false     -- a query for the current target went out
+local waiting = false       -- and its answer has not come back yet
+local staleOut = false      -- an answer about the previous target is still on its way
+local lastQuery, firstQuery, answered = 0, nil, false
 local lastAnswer
-local pace = QUERY_EVERY
-local glide = QUERY_EVERY * 1.15
-local agro = { name = AGRO, agro = true, class = 'agro', threat = 1, perc = 110, tps = 0,
+local pace = 0.25           -- seconds between answers, measured
+local glide = pace * 1.15
+local agro = { name = AGRO, agro = true, class = 'agro', threat = 1, perc = 110, rankKey = 1000, tps = 0,
                fromPerc = 110, fromThreat = 1, fromTps = 0, start = 0 }
 local playerEntry, tankEntry
 
@@ -246,13 +254,14 @@ local function setEntry(name, tank, threat, perc, melee, now, snap)
     -- A player who had no bar last time starts where the answer puts them.
     retarget(e, now, threat, perc, threatPerSecond(e, now, threat), snap or fresh or not e.bar)
     e.tank, e.melee = tank, melee
+    if fresh or not e.rankKey or abs(perc - e.rankKey) >= RANK_DEADBAND then e.rankKey = perc end
     e.class = TWT.getClass(name)
     e.seen, e.seenAt = answer, now
     return e
 end
 
 local function byThreat(a, b)
-    if a.perc ~= b.perc then return a.perc > b.perc end
+    if a.rankKey ~= b.rankKey then return a.rankKey > b.rankKey end
     return a.name < b.name
 end
 
@@ -505,11 +514,16 @@ local function renderIndicator(now)
 end
 
 local function renderTitle(now)
+    if titleKey == -2 and not playerEntry then return end   -- the no-answer note stays
     local key = playerEntry and round(shownPerc(playerEntry, now)) or -1
     if key == titleKey then return end
     titleKey = key
-    if key < 0 then TWT.updateTitleBarText() else
+    if key >= 0 then
         TWT.updateTitleBarText(TWT.targetName .. ' (' .. key .. '%)')
+    elseif TWT.targetName ~= '' then
+        TWT.updateTitleBarText(TWT.targetName)
+    else
+        TWT.updateTitleBarText()
     end
 end
 
@@ -647,41 +661,35 @@ end
 
 -- Answers ---------------------------------------------------------------------
 
-local function parseThreatItem(item)
-    local p1 = find(item, ':', 1, true); if not p1 then return end
-    local p2 = find(item, ':', p1 + 1, true); if not p2 then return end
-    local p3 = find(item, ':', p2 + 1, true); if not p3 then return end
-    local p4 = find(item, ':', p3 + 1, true); if not p4 then return end
-    return sub(item, 1, p1 - 1), sub(item, p1 + 1, p2 - 1) == '1',
-           tonumber(sub(item, p2 + 1, p3 - 1)) or 0, tonumber(sub(item, p3 + 1, p4 - 1)) or 0,
-           sub(item, p4 + 1) == '1'
-end
+local FIELDS5 = '^([^:;#]*):([^:;#]*):([^:;#]*):([^:;#]*):([^:;#]*)'
+local FIELDS4 = '^([^:;#]*):([^:;#]*):([^:;#]*):([^:;#]*)'
 
-local function parseTankItem(item)
-    local p1 = find(item, ':', 1, true); if not p1 then return end
-    local p2 = find(item, ':', p1 + 1, true); if not p2 then return end
-    local p3 = find(item, ':', p2 + 1, true); if not p3 then return end
-    return sub(item, 1, p1 - 1), sub(item, p1 + 1, p2 - 1), sub(item, p2 + 1, p3 - 1),
-           tonumber(sub(item, p3 + 1)) or 0
-end
-
-local function eachItem(list, from, fn, now)
-    local len = #list
-    while from <= len do
-        local semi = find(list, ';', from, true) or (len + 1)
-        if semi > from then fn(sub(list, from, semi - 1), now) end
-        from = semi + 1
+local function readThreatItems(msg, pos, now)
+    local len = #msg
+    while pos <= len do
+        local _, last, name, tank, threat, perc, melee = find(msg, FIELDS5, pos)
+        if name then
+            setEntry(name, tank == '1', tonumber(threat) or 0, tonumber(perc) or 0, melee == '1', now)
+            pos = last + 1
+        end
+        local stop = find(msg, '[;#]', pos)
+        if not stop or sub(msg, stop, stop) == '#' then return end
+        pos = stop + 1
     end
 end
 
-local function readThreatItem(item, now)
-    local name, tank, threat, perc, melee = parseThreatItem(item)
-    if name then setEntry(name, tank, threat, perc, melee, now) end
-end
-
-local function readTankItem(item, now)
-    local creature, guid, name, perc = parseTankItem(item)
-    if creature and guid then setTankRow(guid, creature, name, perc, now) end
+local function readTankItems(msg, pos, now)
+    local len = #msg
+    while pos <= len do
+        local _, last, creature, guid, name, perc = find(msg, FIELDS4, pos)
+        if creature then
+            setTankRow(guid, creature, name, tonumber(perc) or 0, now)
+            pos = last + 1
+        end
+        local stop = find(msg, ';', pos, true)
+        if not stop then return end
+        pos = stop + 1
+    end
 end
 
 local function warn(now)
@@ -743,23 +751,25 @@ function TWT.handleAnswer(msg)
     local hash = find(msg, '#', 1, true)
     local tankStart = hash and find(msg, TANK_MODE_API, hash + 1, true)
     if tankStart then
-        eachItem(msg, tankStart + #TANK_MODE_API, readTankItem, now)
+        readTankItems(msg, tankStart + #TANK_MODE_API, now)
         TWT.showTankRows()
         wake(now)
     end
-    -- An answer that arrives before we asked about the current target is for the old one.
+    -- Answers are in order: one still due from before a target change is for the old target.
+    if staleOut then staleOut = false; return end
     if TWT.targetName == '' or not querySent then return end
+    waiting = false
+    if not answered then answered = true; titleKey = nil end
     local start = find(msg, THREAT_API, 1, true)
     local snap = not next(entries)
     if lastAnswer then
         local gap = now - lastAnswer
-        if gap > 0.1 and gap < 2 then pace = pace * 0.7 + gap * 0.3 end
+        if gap > 0.02 and gap < 2 then pace = pace * 0.7 + gap * 0.3 end
     end
     lastAnswer = now
-    local listEnd = hash and hash - 1 or #msg
-    eachItem(sub(msg, 1, listEnd), start + #THREAT_API, readThreatItem, now)
+    readThreatItems(msg, start + #THREAT_API, now)
     TWT.rank(now, snap)
-    glide = max(0.2, min(1.5, pace * 1.15))
+    glide = max(0.08, min(1.5, pace * 1.15))
     warn(now)
 end
 
@@ -767,7 +777,8 @@ end
 -- Tank-mode rows do not depend on the target; the end of a fight clears them.
 function TWT.clear()
     releaseAll()
-    querySent = false
+    staleOut = staleOut or waiting
+    querySent, waiting, firstQuery, answered = false, false, nil, false
     titleKey = nil
     TWT.updateTitleBarText()
     hideIndicator()
@@ -784,20 +795,32 @@ function TWT.query()
     if not channel then return end
     SendAddonMessage(QUERY_PREFIX .. (TWT_CONFIG.tankMode and '_TM' or ''),
             'limit=' .. (TWT_CONFIG.visibleBars - 1), channel)
-    querySent = true
+    local now = GetTime()
+    querySent, waiting, lastQuery = true, true, now
+    firstQuery = firstQuery or now
 end
 
 TWT.threatQuery:SetScript('OnShow', function()
     local frame = this
     if frame.timer then frame.timer:Cancel() end
     local timer
-    timer = C_Timer.NewTicker(QUERY_EVERY, function()
+    timer = C_Timer.NewTicker(QUERY_GAP, function()
         if frame.timer ~= timer or not frame:IsVisible() then return end
         if not groupChannel() or not inCombat() or not UnitAffectingCombat('target') then return end
         if TWT.targetName == '' then
             TWT.targetChanged()
             return
         end
+        local now = GetTime()
+        if staleOut then
+            if now - lastQuery < ANSWER_TIMEOUT then return end
+            staleOut = false
+        end
+        if not answered and firstQuery and now - firstQuery > NO_ANSWER and titleKey ~= -2 then
+            titleKey = -2
+            TWT.updateTitleBarText(TWT.targetName .. ' |cff888888- no threat data from the server')
+        end
+        if waiting and now - lastQuery < ANSWER_TIMEOUT then return end
         local cfg = TWT_CONFIG
         if cfg.visible or cfg.glow or cfg.perc or cfg.fullScreenGlow or cfg.aggroSound or cfg.tankMode then
             TWT.query()
@@ -812,16 +835,14 @@ end)
 
 -- Target and combat -----------------------------------------------------------
 
--- Threat is shown for elite and boss targets in combat, in a group.
+-- Threat is shown for any NPC we fight in a group.
+local GLOW = { worldboss = 'elite', elite = 'elite', rareelite = 'rareelite', rare = 'rare' }
+
 function TWT.targetChanged()
     TWT.targetName = ''
     if not UnitExists('target') or UnitIsDead('target') or UnitIsPlayer('target') then return false end
-    local classification = UnitClassification('target')
-    if classification ~= 'worldboss' and classification ~= 'elite' and classification ~= 'rareelite' then
-        return false
-    end
     if not groupChannel() or not inCombat() or not UnitAffectingCombat('target') then return false end
-    glowTexture = IMAGES .. (classification == 'worldboss' and 'elite' or classification)
+    glowTexture = IMAGES .. (GLOW[UnitClassification('target')] or 'normal')
     TWT.targetName = TWT.unitNameForTitle(UnitName('target'))
     titleKey = nil
     TWT.updateTitleBarText(TWT.targetName)
@@ -842,6 +863,7 @@ end
 
 function TWT.combatEnd()
     TWT.clear()
+    staleOut = false
     releaseTankRows()
     TWT.threatQuery:Hide()
     if TWT_CONFIG.hideOOC then TWTMain:Hide() end
